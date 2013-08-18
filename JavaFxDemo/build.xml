@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="JavaFxDemo Build" default="-post-jfx-deploy-release" 
+    basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
+
+	<description>This procedure will compile/build the JavaFxDemo source</description>
+
+	<!-- Set global properties for this build -->
+	<property name="jdk.home"	value="D:/jdk1.8.0"/>
+	<property name="src"		location="src"/>
+	<property name="build"		location="build"/>
+	<property name="Release"	location="Release"/>
+	<!-- Setup properties for JavaFX packaging -->
+    <property name="javafx.tools.ant.jar"  	location="${jdk.home}/lib/ant-javafx.jar"/>
+    <property name="application.title"     	value="JavaFxDemo"/>
+    <property name="application.vendor"    	value="GDG Space Coast"/>
+    <property name="application.version"  	value="1.0"/>
+    <property name="javafx.main.class"    	value="com.gdgspacecoast.javafxdemo.JavaFxDemo"/>
+	
+		<!-- Set the project class path -->
+	<path id="project.class.path">
+		<pathelement location="${build}"/>
+		<pathelement location="${jdk.home}/jre/lib/rt.jar"/>
+	</path>
+
+	<!-- Delete the ${build} directory tree -->
+	<target name="clean" description="Clean up tasks" >
+		<delete dir="${build}"/>
+	</target>
+
+	<!-- Create the build and distribution directory structure -->
+	<target name="init" depends="clean" description="Initialization tasks">
+		<tstamp/>
+		<mkdir dir="${build}"/>
+		
+		<copy todir="${build}/com/gdgspacecoast/javafxdemo">
+			<fileset dir="${src}/com/gdgspacecoast/javafxdemo" />
+		</copy>
+	</target>
+
+	<!-- Compile the java code from ${src} into ${build} -->
+    <echo message="Using Java version ${ant.java.version}."/>
+	<target name="compile" depends="init" description="Compile the source " >
+		<javac bootclasspathref="project.class.path"
+			srcdir="${src}"
+			debug="true"
+			debuglevel="lines,vars,source"
+			destdir="${build}"
+			nowarn="true"
+			source="1.8"
+			target="1.8"
+			includeantruntime="false"
+			fork="yes">
+		</javac>
+	</target>
+
+	<!-- Package the classes and resources into a self-contained app bundle -->
+	<target name="-post-jfx-deploy-release" depends="compile"
+		description="Generate the native bundles in release mode">
+		<delete dir="${Release}" />
+		<mkdir dir="${Release}" />
+		<taskdef resource="com/sun/javafx/tools/ant/antlib.xml" uri="javafx:com.sun.javafx.tools.ant"
+			classpath=".:${javafx.tools.ant.jar}" />
+
+		<fx:application name="JavaFxDemo" id="JavaFxDemo"
+			mainClass="${javafx.main.class}" version="${application.version}" />
+
+		<!-- Create doubleclickable jar file with embedded launcher -->
+		<fx:jar destfile="${Release}/JavaFxDemo.jar">
+			<fileset dir="${build}" />
+			<fx:application refId="JavaFxDemo" />
+			<manifest>
+				<attribute name="Implementation-Vendor" value="${application.vendor}" />
+				<attribute name="Implementation-Title" value="${application.title}" />
+				<attribute name="Implementation-Version" value="${application.version}" />
+			</manifest>
+			
+			<!-- Setup the classpath for the generated .jar here -->
+			<fx:resources>
+				<fx:fileset type="jar" requiredFor="startup"
+					dir="${Release}" includes="JavaFxDemo.jar" />
+			</fx:resources>
+		</fx:jar>
+
+		<fx:deploy width="1000" height="730" nativeBundles="image"
+			outdir="${Release}" outfile="${application.title}">
+
+			<fx:application refId="JavaFxDemo" />
+
+			<!-- Copies the actual library .jars to the bundle here -->
+			<fx:resources>
+				<fx:fileset type="jar" requiredFor="startup"
+					dir="${Release}" includes="JavaFxDemo.jar" />
+			</fx:resources>
+			
+			<fx:info title="${application.title}" vendor="${application.vendor}" />
+		</fx:deploy>
+	</target>
+
+</project>

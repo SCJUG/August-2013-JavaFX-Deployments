@@ -20,7 +20,7 @@ Runtime
 ==============================
 
 1. In Eclipse, select the updated build.xml file for the project and do Run As->Ant Build
-1. After the build completes, you can run the packaged app .exe from Release/bundles/<app>/
+1. After the build completes, you can run the packaged app .exe from Release/bundles/\<app\>/
 
 
 
